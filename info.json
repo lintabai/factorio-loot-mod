@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "title": "Loot & Rarity",
   "author": "lintabai",
-  "description": "Diablo/PoE-style item rarity and affix system for Factorio + Space Age. Crafted entities roll random rarities with positive and negative modifiers. Reroll with a Tinkerer's Forge using currency orbs.",
+  "contact": "https://github.com/lintabai/factorio-loot-mod/issues",
+  "homepage": "https://github.com/lintabai/factorio-loot-mod",
+  "description": "Diablo/PoE-style rarity and affix system. Crafted entities and armor roll random prefixes and suffixes with positive and negative modifiers. Reroll with the Tinkerer's Forge using currency orbs.",
+  "factorio_version": "2.0",
   "dependencies": [
     "base >= 2.0.0",
     "space-age >= 2.0.0"
   ],
-  "factorio_version": "2.0"
+  "quality_required": true,
+  "space_travel_required": true
 }

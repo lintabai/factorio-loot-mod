@@ -1,0 +1,21 @@
+# Build/zip artifacts
+*.zip
+build/
+dist/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Factorio runtime artifacts
+factorio-current.log
+script-output/
+
+# Lua cache
+*.luac
+
+# OS junk
+.DS_Store
+Thumbs.db

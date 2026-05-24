@@ -4,17 +4,18 @@
 local Storage = require("src.storage")
 local Events  = require("src.events")
 
+-- Top-level registration so handlers are bound during script load
+-- (needed for joining-player parity in multiplayer).
+Events.register()
+
 script.on_init(function()
   Storage.init()
-  Events.register()
 end)
 
 script.on_load(function()
-  -- on_load: re-register event handlers (storage already exists, don't re-init)
-  Events.register()
+  -- on_load: no game state access; handlers already bound at top level.
 end)
 
-script.on_configuration_changed(function(data)
-  -- Re-init any missing storage fields when mod is updated
+script.on_configuration_changed(function()
   Storage.init()
 end)

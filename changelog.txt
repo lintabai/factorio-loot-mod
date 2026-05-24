@@ -1,0 +1,16 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2026-05-24
+  Features:
+    - Initial release. Diablo/PoE-style rarity and affix system for crafted entities and armor.
+    - Five rarity tiers (Normal/Magic/Rare/Epic/Legendary) gated by research.
+    - 9 currency orbs for rerolling: Transmutation, Alteration, Alchemy, Chaos, Augmentation,
+      Annulment, Scouring, Exaltation, Blessed.
+    - Tinkerer's Forge: custom container with side panel GUI showing destruction risk.
+    - Affix pools for assemblers (incl. resource-specific), miners, furnaces, inserters,
+      electric poles, labs (incl. science-type-specific), armor.
+    - Lucky/Cursed armor modifier shifts rarity rolls.
+    - "of the Artificer" armor suffix grants +1 rarity tier when hand-crafting.
+    - Biter-Attracting lab affix spawns biters on research completion.
+    - 13 research nodes including separate paths for orb crafting and affix mastery.
+    - Multiplayer-safe state management via unit_number-keyed storage.

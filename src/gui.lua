@@ -1,7 +1,7 @@
 -- src/gui.lua
 -- Tinkerer's Forge custom GUI.
--- Opens when player right-clicks the Forge container entity.
--- Shows: slot previews, destruction chance, Apply button, result message.
+-- Opens alongside the default container GUI when player opens the Forge.
+-- Uses player.gui.screen for the side panel (NOT closing the container GUI).
 
 local C       = require("src.constants")
 local Forge   = require("src.forge")
@@ -12,39 +12,50 @@ local GUI = {}
 
 local FRAME_NAME = "loot_forge_frame"
 
--- ── Build GUI ─────────────────────────────────────────────────────────────────
-
 function GUI.open(player, forge_entity)
-  GUI.close(player) -- prevent duplicate frames
+  GUI.close(player)
 
   local screen = player.gui.screen
   local frame = screen.add{
-    type="frame", name=FRAME_NAME,
-    caption="[img=item/loot-tinkerers-forge]  Tinkerer's Forge",
-    direction="vertical",
+    type      = "frame",
+    name      = FRAME_NAME,
+    caption   = {"loot-gui.forge-title"},
+    direction = "vertical",
   }
   frame.auto_center = true
 
-  -- Instruction label
-  frame.add{type="label", caption="[color=#aaaaaa]Slot 1: item to reroll  |  Slot 2: currency orb[/color]"}
+  frame.add{
+    type    = "label",
+    caption = {"loot-gui.slot-instructions"},
+  }
 
-  -- Info row (destruction chance)
-  local info = frame.add{type="label", name="loot_forge_info", caption=""}
+  frame.add{
+    type    = "label",
+    name    = "loot_forge_info",
+    caption = "",
+  }
 
-  -- Apply button
   local btn_row = frame.add{type="flow", direction="horizontal"}
   btn_row.add{
-    type="button", name="loot_forge_apply_btn",
-    caption="Apply Orb",
-    style="confirm_button",
+    type    = "button",
+    name    = "loot_forge_apply_btn",
+    caption = {"loot-gui.apply-orb"},
+    style   = "confirm_button",
   }
-  btn_row.add{type="button", name="loot_forge_close_btn", caption="Close"}
+  btn_row.add{
+    type    = "button",
+    name    = "loot_forge_close_btn",
+    caption = {"loot-gui.close"},
+  }
 
-  -- Result message label
-  frame.add{type="label", name="loot_forge_result", caption=""}
+  frame.add{
+    type    = "label",
+    name    = "loot_forge_result",
+    caption = "",
+  }
 
   Storage.set_forge_gui(player.index, {
-    forge_unit = forge_entity.unit_number,
+    forge_unit   = forge_entity.unit_number,
     forge_entity = forge_entity,
   })
 
@@ -57,7 +68,6 @@ function GUI.close(player)
   Storage.clear_forge_gui(player.index)
 end
 
--- Update the destruction chance label based on current item in slot 1
 function GUI.refresh_info(player, forge_entity)
   local screen = player.gui.screen
   if not screen[FRAME_NAME] then return end
@@ -74,7 +84,7 @@ function GUI.refresh_info(player, forge_entity)
 
   local item_slot = inv[1]
   if not item_slot.valid_for_read then
-    info_label.caption = "[color=#aaaaaa]Awaiting item...[/color]"
+    info_label.caption = "[color=#aaaaaa]Awaiting item in slot 1...[/color]"
     return
   end
 
@@ -93,9 +103,7 @@ function GUI.refresh_info(player, forge_entity)
   else
     table.insert(lines, "[color=green]No destruction risk[/color]")
   end
-
-  -- Show current affixes
-  if loot_data and (#loot_data.prefixes > 0 or #loot_data.suffixes > 0) then
+  if loot_data and ((#loot_data.prefixes > 0) or (#loot_data.suffixes > 0)) then
     table.insert(lines, "")
     table.insert(lines, Naming.build_tooltip(rarity, loot_data.prefixes, loot_data.suffixes))
   end
@@ -103,12 +111,9 @@ function GUI.refresh_info(player, forge_entity)
   info_label.caption = table.concat(lines, "\n")
 end
 
--- ── GUI event handlers ────────────────────────────────────────────────────────
-
 function GUI.on_gui_click(event)
   local player = game.get_player(event.player_index)
   if not player then return end
-
   local name = event.element and event.element.name
   if not name then return end
 
@@ -120,16 +125,12 @@ function GUI.on_gui_click(event)
   if name == "loot_forge_apply_btn" then
     local gui_data = Storage.get_forge_gui(player.index)
     if not gui_data then return end
-
     local forge_entity = gui_data.forge_entity
     if not forge_entity or not forge_entity.valid then
-      GUI.close(player)
-      return
+      GUI.close(player); return
     end
 
     local result = Forge.process(forge_entity, player)
-
-    -- Update result label
     local screen = player.gui.screen
     if screen[FRAME_NAME] then
       local result_label = screen[FRAME_NAME]["loot_forge_result"]
@@ -146,7 +147,6 @@ function GUI.on_gui_click(event)
       end
       GUI.refresh_info(player, forge_entity)
     end
-    return
   end
 end
 
@@ -155,22 +155,24 @@ function GUI.on_gui_opened(event)
   local entity = event.entity
   if not entity or not entity.valid then return end
   if entity.name ~= C.FORGE_ENTITY then return end
-
   local player = game.get_player(event.player_index)
   if not player then return end
-
-  -- Close default container GUI, open ours
-  player.opened = nil
+  -- Do NOT close the container GUI; show our side panel alongside it.
   GUI.open(player, entity)
 end
 
 function GUI.on_gui_closed(event)
   local player = game.get_player(event.player_index)
   if not player then return end
-  local screen = player.gui.screen
-  if screen[FRAME_NAME] then
+  -- Also close our panel if the container GUI was closed
+  if event.gui_type == defines.gui_type.entity
+     and event.entity and event.entity.valid
+     and event.entity.name == C.FORGE_ENTITY then
     GUI.close(player)
+    return
   end
+  -- If the player clicked our close button, frame is already destroyed.
+  -- If the panel still exists with no container entity context, leave it (rare case).
 end
 
 return GUI
