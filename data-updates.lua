@@ -1,0 +1,3 @@
+-- data-updates.lua
+-- Post-base prototype adjustments.
+-- Currently empty — reserved for cross-mod compatibility patches.
